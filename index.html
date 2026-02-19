@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: transparent;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .translator-container {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+        }
+        textarea {
+            width: 100%;
+            border: 1px solid #efefef;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 14px;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: #000; }
+        .output-area {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            min-height: 40px;
+            font-size: 14px;
+            color: #333;
+            border-left: 2px solid #000;
+        }
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        button {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+        button:hover { background: #333; }
+        .switch-btn {
+            background: #f0f0f0;
+            color: #000;
+            width: 40px;
+            flex-grow: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="translator-container">
+    <div class="header">
+        <span id="lang-src">English</span>
+        <span>→</span>
+        <span id="lang-tgt">Portuguese</span>
+    </div>
+    
+    <textarea id="input-text" rows="3" placeholder="Type word or phrase..."></textarea>
+    
+    <div class="controls">
+        <button onclick="translateText()">Translate</button>
+        <button class="switch-btn" onclick="toggleLanguages()" title="Switch Languages">⇄</button>
+    </div>
+
+    <div class="output-area" id="output-text">Translation will appear here...</div>
+</div>
+
+<script>
+    let sourceLang = 'en';
+    let targetLang = 'pt';
+
+    function toggleLanguages() {
+        const temp = sourceLang;
+        sourceLang = targetLang;
+        targetLang = temp;
+        
+        document.getElementById('lang-src').innerText = sourceLang === 'en' ? 'English' : 'Portuguese';
+        document.getElementById('lang-tgt').innerText = targetLang === 'pt' ? 'Portuguese' : 'English';
+        document.getElementById('input-text').value = '';
+        document.getElementById('output-text').innerText = 'Translation will appear here...';
+    }
+
+    async function translateText() {
+        const text = document.getElementById('input-text').value;
+        const outputDiv = document.getElementById('output-text');
+        
+        if (!text) return;
+
+        outputDiv.innerText = "Translating...";
+
+        try {
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`);
+            const data = await response.json();
+            
+            if (data.responseData) {
+                outputDiv.innerText = data.responseData.translatedText;
+            } else {
+                outputDiv.innerText = "Error in translation.";
+            }
+        } catch (error) {
+            outputDiv.innerText = "Service unavailable.";
+        }
+    }
+</script>
+
+</body>
+</html>
